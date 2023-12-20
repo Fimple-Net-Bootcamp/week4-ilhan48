@@ -16,16 +16,16 @@ public static class UpdateUser
         public string UserName { get; set; }
     }
 
-    internal sealed class Handle : IRequestHandler<Command, Unit>
+    internal sealed class Handler : IRequestHandler<Command, Unit>
     {
         private readonly PetManagementDbContext _context;
 
-        public Handle(PetManagementDbContext context)
+        public Handler(PetManagementDbContext context)
         {
             _context = context;
         }
 
-        async Task<Unit> IRequestHandler<Command, Unit>.Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
             var user = await _context.Users.FindAsync(request.Id);
 
