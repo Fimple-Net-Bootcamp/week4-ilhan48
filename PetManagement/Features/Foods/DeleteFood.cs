@@ -1,18 +1,17 @@
 ﻿using Carter;
 using MediatR;
 using PetManagement.Database;
-using PetManagement.Features.Users;
 
-namespace PetManagement.Features.Pets;
+namespace PetManagement.Features.Foods;
 
-public static class DeletePet
+public static class DeleteFood
 {
     public class Command : IRequest<Unit>
     {
         public int Id { get; set; }
     }
 
-    internal sealed class Handler : IRequestHandler<Command, Unit> 
+    internal sealed class Handler : IRequestHandler<Command, Unit>
     {
         private readonly PetManagementDbContext _context;
 
@@ -23,11 +22,11 @@ public static class DeletePet
 
         public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
-            var pet = await _context.Pets.FindAsync(request.Id);
+            var food = await _context.Foods.FindAsync(request.Id);
 
-            if (pet != null)
+            if (food != null)
             {
-                _context.Pets.Remove(pet);
+                _context.Foods.Remove(food);
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
@@ -35,13 +34,13 @@ public static class DeletePet
         }
     }
 }
-public class DeleteUserEndpoint : ICarterModule
+public class DeleteFoodEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapDelete("api/v1/pets/{id}", async (int id, ISender sender) =>
+        app.MapDelete("api/v1/foods/{id}", async (int id, ISender sender) =>
         {
-            var command = new DeletePet.Command { Id = id };
+            var command = new DeleteFood.Command { Id = id };
 
             await sender.Send(command);
 
