@@ -40,6 +40,7 @@ public static class UpdatePet
                     pet.Color = request.Color;
                     pet.Gender = request.Gender;
                     pet.OwnerId = request.OwnerId;
+                    pet.UpdatedDate = DateTime.UtcNow;
 
                     await _context.SaveChangesAsync(cancellationToken);
                 }

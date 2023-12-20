@@ -57,7 +57,8 @@ public static class CreateHealthStatus
                 VaccinationStatus = request.VaccinationStatus,
                 TreatmentInfo = request.TreatmentInfo,
                 Notes = request.Notes,
-                PetId = request.PetId
+                PetId = request.PetId,
+                CreatedDate = DateTime.UtcNow,
             };
 
             _context.Add(entity);

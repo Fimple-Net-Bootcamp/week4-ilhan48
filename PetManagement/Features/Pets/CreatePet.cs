@@ -62,6 +62,7 @@ public static class CreatePet
                 Color = request.Color,
                 Type = request.Type,
                 OwnerId = request.OwnerId,
+                CreatedDate = DateTime.UtcNow
             };
 
             _context.Add(entity);

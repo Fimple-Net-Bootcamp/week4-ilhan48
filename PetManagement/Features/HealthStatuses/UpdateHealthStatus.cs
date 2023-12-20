@@ -41,7 +41,7 @@ public static class UpdateHealthStatus
                     healthStatus.ExaminationDate = request.ExaminationDate;
                     healthStatus.TreatmentInfo = request.TreatmentInfo;
                     healthStatus.PetId = request.PetId;
-
+                    healthStatus.UpdatedDate = DateTime.UtcNow;
 
                     await _context.SaveChangesAsync(cancellationToken);
                 }
@@ -50,7 +50,7 @@ public static class UpdateHealthStatus
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in UpdatePet.Handler: {ex.Message}");
+                Console.WriteLine($"Error in UpdateHealthStatus.Handler: {ex.Message}");
                 throw;
             }
         }
