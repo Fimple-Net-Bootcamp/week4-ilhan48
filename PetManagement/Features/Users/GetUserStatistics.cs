@@ -1,6 +1,8 @@
 ﻿using Carter;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
+using PetManagement.Database;
 using PetManagement.Features.Pets;
 
 namespace PetManagement.Features.Users;
@@ -14,10 +16,12 @@ public static class GetUserStatistics
 
     internal sealed class Handler : IRequestHandler<Query, UserStatistics>
     {
+        private readonly PetManagementDbContext _context;
         private readonly ISender _mediator;
 
-        public Handler(ISender mediator)
+        public Handler(PetManagementDbContext context, ISender mediator)
         {
+            _context = context;
             _mediator = mediator;
         }
 
@@ -25,10 +29,22 @@ public static class GetUserStatistics
         {
             var petStatisticsQuery = new GetPetStatistics.Query { UserId = request.UserId };
 
+            var userPets = await _context.Pets
+                .Where(pet => pet.OwnerId == request.UserId)
+                .Select(pet => new PetResponse
+                {
+                    Name = pet.Name,
+                    Type = pet.Type,
+                    BirthDate = pet.BirthDate,
+                    Color = pet.Color,
+                    Gender = pet.Gender,
+                })
+                .ToListAsync(cancellationToken);
+
             var userStatistics = new UserStatistics
             {
                 UserId = request.UserId,
-                PetStatistics = await _mediator.Send(petStatisticsQuery),
+                OwnedPets = userPets,
             };
 
             return userStatistics;

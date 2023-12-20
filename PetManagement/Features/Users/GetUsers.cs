@@ -33,6 +33,16 @@ public static class GetUsers
                     Email = user.Email,
                     UserName = user.UserName,
                     CreatedOnUtc = user.CreatedDate,
+
+                    Pets = user.OwnedPets.Select(pet => new PetResponse
+                    {
+                        Name = pet.Name,
+                        Type = pet.Type,
+                        BirthDate = pet.BirthDate,
+                        Color = pet.Color,
+                        Gender = pet.Gender,
+
+                    }).ToList()
                 })
                 .ToListAsync(cancellationToken);
             return userResponse;

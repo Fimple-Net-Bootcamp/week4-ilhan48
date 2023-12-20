@@ -3,5 +3,5 @@
 public class UserStatistics
 {
     public Guid UserId { get; set; }
-    public PetStatistics PetStatistics { get; set; }
+    public List<PetResponse> OwnedPets { get; set; }
 }

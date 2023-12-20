@@ -1,7 +1,9 @@
 ﻿using Carter;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
 using PetManagement.Database;
+using PetManagement.Entities;
 using PetManagement.Features.Activities;
 using PetManagement.Features.Foods;
 using PetManagement.Features.HealthStatuses;
@@ -18,10 +20,12 @@ public static class GetPetStatistics
 
     internal sealed class Handler : IRequestHandler<Query, PetStatistics>
     {
+        private readonly PetManagementDbContext _context;
         private readonly ISender _mediator;
 
-        public Handler(ISender mediator)
+        public Handler(PetManagementDbContext context, ISender mediator)
         {
+            _context = context;
             _mediator = mediator;
         }
 
@@ -37,6 +41,7 @@ public static class GetPetStatistics
                 ActivityStatistics = await _mediator.Send(activityQuery),
                 HealthStatusStatistics = await _mediator.Send(healthStatusQuery),
                 FoodStatistics = await _mediator.Send(foodQuery),
+
             };
             return petStatistics;
 

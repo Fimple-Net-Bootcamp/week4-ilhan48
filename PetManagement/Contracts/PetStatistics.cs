@@ -6,4 +6,5 @@ public class PetStatistics
     public ActivityResponse ActivityStatistics { get; set; }
     public HealthStatusResponse HealthStatusStatistics { get; set; }
     public FoodResponse FoodStatistics { get; set; }
+
 }
