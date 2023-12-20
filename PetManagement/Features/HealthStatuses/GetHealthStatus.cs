@@ -10,7 +10,7 @@ public static class GetHealthStatus
 {
     public class Query : IRequest<HealthStatusResponse>
     {
-        public int HealthStatusId { get; set; }
+        public int Id { get; set; }
     }
 
     internal sealed class Handler : IRequestHandler<Query, HealthStatusResponse>
@@ -26,7 +26,7 @@ public static class GetHealthStatus
         {
             var healthStatusResponse = await _context
                 .HealthStatuses
-                .Where(hs => hs.Id == request.HealthStatusId)
+                .Where(hs => hs.Id == request.Id)
                 .Select(hs => new HealthStatusResponse
                 {
                     TreatmentInfo = hs.TreatmentInfo,
@@ -49,7 +49,7 @@ public class GetHealthStatusEndpoint : ICarterModule
     {
         app.MapGet("api/v1/healthStatuses/{id}", async (int id, ISender sender) =>
         {
-            var query = new GetHealthStatus.Query { HealthStatusId = id };
+            var query = new GetHealthStatus.Query { Id = id };
 
             var result = await sender.Send(query);
 
