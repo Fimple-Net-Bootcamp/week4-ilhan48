@@ -8,41 +8,12 @@ using PetManagement.Features.HealthStatuses;
 
 namespace PetManagement.Features.Pets;
 
-//public static class GetPetStatistics
-//{
-//    public class Query : IRequest<PetStatistics>
-//    {
-//        public int PetId { get; set; }
-//    }
-
-//    internal sealed class Handler : IRequestHandler<Query, PetStatistics>
-//    {
-//        private readonly PetManagementDbContext _context;
-
-//        public Handler(PetManagementDbContext context)
-//        {
-//            _context = context;
-//        }
-
-//        public async Task<PetStatistics> Handle(Query request, CancellationToken cancellationToken)
-//        {
-//            var petStatistics = new PetStatistics
-//            {
-//                PetId = request.PetId,
-//                ActivityStatistics = await GetActivityEndpoint (request.PetId),
-//                HealthStatusStatistics = await Features.HealthStatuses.GetHealthStatus(request.PetId),
-//                FoodStatistics = await GetFood(request.PetId),
-//            };
-//            return petStatistics;
-//        }
-//    }
-//}
-
 public static class GetPetStatistics
 {
     public class Query : IRequest<PetStatistics>
     {
-        public int Id { get; set; }
+        public int PetId { get; set; }
+        public Guid? UserId { get; set; }
     }
 
     internal sealed class Handler : IRequestHandler<Query, PetStatistics>
@@ -56,13 +27,13 @@ public static class GetPetStatistics
 
         public async Task<PetStatistics> Handle(Query request, CancellationToken cancellationToken)
         {
-            var activityQuery = new GetActivity.Query { Id = request.Id };
-            var healthStatusQuery = new GetHealthStatus.Query { Id = request.Id };
-            var foodQuery = new GetFood.Query { Id = request.Id };
+            var activityQuery = new GetActivity.Query { Id = request.PetId };
+            var healthStatusQuery = new GetHealthStatus.Query { Id = request.PetId };
+            var foodQuery = new GetFood.Query { Id = request.PetId };
 
             var petStatistics = new PetStatistics
             {
-                PetId = request.Id,
+                PetId = request.PetId,
                 ActivityStatistics = await _mediator.Send(activityQuery),
                 HealthStatusStatistics = await _mediator.Send(healthStatusQuery),
                 FoodStatistics = await _mediator.Send(foodQuery),
@@ -79,7 +50,7 @@ public class GetPetStatisticsEndpoint : ICarterModule
     {
         app.MapGet("api/v1/pets/statistics/{id}", async (int id, ISender sender) =>
         {
-            var query = new GetPetStatistics.Query { Id = id };
+            var query = new GetPetStatistics.Query { PetId = id };
 
             var result = await sender.Send(query);
 
