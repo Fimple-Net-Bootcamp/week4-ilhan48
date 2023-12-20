@@ -12,8 +12,8 @@ public class Pet : BaseEntity<int>
 
 
     [ForeignKey(nameof(User))]
-    public Guid OwnerId { get; set; }
-    public virtual User Owner { get; set; }
+    public Guid? OwnerId { get; set; }
+    public virtual User? Owner { get; set; }
 
     public int HealthStatusId { get; set; }
     public virtual HealthStatus HealthStatus { get; set; }
