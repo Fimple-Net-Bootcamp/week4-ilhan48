@@ -1,14 +1,19 @@
 ﻿using Carter;
+using Mapster;
 using MediatR;
 using PetManagement.Database;
 
 namespace PetManagement.Features.Users;
 
-public static class DeleteUser
+public static class UpdateUser
 {
     public class Command : IRequest<Unit>
     {
         public Guid Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string UserName { get; set; }
     }
 
     internal sealed class Handle : IRequestHandler<Command, Unit>
@@ -26,7 +31,8 @@ public static class DeleteUser
 
             if (user != null)
             {
-                _context.Users.Remove(user);
+                user = request.Adapt(user);
+
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
@@ -35,15 +41,15 @@ public static class DeleteUser
     }
 }
 
-public class DeleteUserEndpoint : ICarterModule
+public class UpdateUserEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapDelete("api/v1/users/{id}", async (Guid id, ISender sender) =>
+        app.MapPut("api/v1/users/{id}", async (Guid id, UpdateUser.Command request, ISender sender) =>
         {
-            var command = new DeleteUser.Command { Id = id };
+            request.Id = id;
 
-            await sender.Send(command);
+            await sender.Send(request);
 
             return Results.NoContent();
         });
