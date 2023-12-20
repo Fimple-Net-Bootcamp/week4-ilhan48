@@ -39,7 +39,7 @@ public static class GetFood
     }
 }
 
-public class GetUserEndpoint : ICarterModule
+public class GetFoodEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
