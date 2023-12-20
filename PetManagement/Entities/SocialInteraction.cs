@@ -4,7 +4,7 @@ public class SocialInteraction : BaseEntity<int>
 {
     public string Name { get; set; }
     public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
+    public DateTime? EndDate { get; set; }
     public virtual ICollection<Pet> Pets { get; set; }
 
     public SocialInteraction()
