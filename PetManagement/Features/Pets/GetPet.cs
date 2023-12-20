@@ -11,7 +11,7 @@ public static class GetPet
 {
     public class Query : IRequest<PetResponse>
     {
-        public int PetId { get; set; }
+        public int Id { get; set; }
     }
 
     internal sealed class Handler : IRequestHandler<Query, PetResponse>
@@ -27,7 +27,7 @@ public static class GetPet
         {
             var petResponse = await _context
                 .Pets
-                .Where(pet => pet.Id == request.PetId)
+                .Where(pet => pet.Id == request.Id)
                 .Select(pet => new PetResponse
                 {
                     Name = pet.Name,
@@ -50,7 +50,7 @@ public class GetUserEndpoint : ICarterModule
     {
         app.MapGet("api/v1/pets/{id}", async (int id, ISender sender) =>
         {
-            var query = new GetPet.Query { PetId = id };
+            var query = new GetPet.Query { Id = id };
 
             var result = await sender.Send(query);
 
