@@ -33,7 +33,7 @@ public static class GetUser
                    LastName = user.LastName,
                    Email = user.Email,
                    UserName = user.UserName,
-                   CreatedOnUtc = DateTime.UtcNow,
+                   CreatedOnUtc = user.CreatedDate,
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
