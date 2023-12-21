@@ -1,9 +1,10 @@
-﻿namespace PetManagement.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace PetManagement.Entities;
 
 public class Food : BaseEntity<int>
 {
     public string Name { get; set; }
-
     public virtual ICollection<Pet> Pets { get; set; }
 
     public Food()

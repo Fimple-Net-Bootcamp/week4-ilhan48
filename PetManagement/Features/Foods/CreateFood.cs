@@ -2,6 +2,7 @@
 using FluentValidation;
 using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
@@ -13,6 +14,7 @@ public static class CreateFood
     public class Command : IRequest<int>
     {
         public string Name { get; set; }
+        public int PetId { get; set; }
     }
 
     public class CreateFoodCommandValidator : AbstractValidator<Command>
@@ -45,12 +47,19 @@ public static class CreateFood
             {
 
             }
+            var pet = await _context.Pets
+            .Include(p => p.Foods) 
+            .FirstOrDefaultAsync(p => p.Id == request.PetId);
+
 
             var entity = new Food
             {
                 Name = request.Name,
                 CreatedDate = DateTime.UtcNow,
             };
+
+            pet.Foods.Add(entity);
+            
 
             _context.Add(entity);
             await _context.SaveChangesAsync();

@@ -1,10 +1,12 @@
-﻿namespace PetManagement.Contracts;
+﻿using PetManagement.Entities;
+
+namespace PetManagement.Contracts;
 
 public class PetStatistics
 {
     public int PetId { get; set; }
-    public ActivityResponse ActivityStatistics { get; set; }
-    public HealthStatusResponse HealthStatusStatistics { get; set; }
-    public FoodResponse FoodStatistics { get; set; }
+    public ICollection<FoodResponse>? Foods { get; set; }
+    public ICollection<TrainingResponse>? Trainings { get; set; }
+    public ICollection<ActivityResponse>? Activities { get; set; }
 
 }

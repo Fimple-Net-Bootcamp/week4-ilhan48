@@ -16,6 +16,9 @@ public static class GetPetStatistics
     {
         public int PetId { get; set; }
         public Guid? UserId { get; set; }
+        public ICollection<ActivityResponse>? Activities { get; set; }
+        public ICollection<FoodResponse>? Foods { get; set; }
+        public ICollection<TrainingResponse>? Trainings { get; set; }
     }
 
     internal sealed class Handler : IRequestHandler<Query, PetStatistics>
@@ -31,18 +34,46 @@ public static class GetPetStatistics
 
         public async Task<PetStatistics> Handle(Query request, CancellationToken cancellationToken)
         {
-            var activityQuery = new GetActivity.Query { Id = request.PetId };
-            var healthStatusQuery = new GetHealthStatus.Query { Id = request.PetId };
-            var foodQuery = new GetFood.Query { Id = request.PetId };
-
             var petStatistics = new PetStatistics
             {
                 PetId = request.PetId,
-                ActivityStatistics = await _mediator.Send(activityQuery),
-                HealthStatusStatistics = await _mediator.Send(healthStatusQuery),
-                FoodStatistics = await _mediator.Send(foodQuery),
-
             };
+
+            
+            var pet = await _context.Pets
+                .Include(p => p.Activities)
+                .Include(p => p.Foods)
+                .Include(p => p.Trainings)
+                .FirstOrDefaultAsync(p => p.Id == request.PetId);
+
+            if (pet != null)
+            {
+                petStatistics.Activities = pet.Activities.Select(a => new ActivityResponse
+                {
+                    Name = a.Name,
+                    Description = a.Description,
+                    DifficultyLevel = a.DifficultyLevel,
+                }).ToList();
+
+                petStatistics.Foods = pet.Foods
+                    .Select(a => new FoodResponse
+                {
+                    Name = a.Name,
+                }).ToList();
+
+                
+
+                petStatistics.Trainings = pet.Trainings.Select(a => new TrainingResponse
+                {
+                    Name = a.Name,
+                    Date = a.Date,
+                }).ToList();
+
+
+
+
+            }
+
             return petStatistics;
 
         }

@@ -2,6 +2,7 @@
 using FluentValidation;
 using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
@@ -12,6 +13,7 @@ public static class CreateTraining
 {
     public class Command : IRequest<int>
     {
+        public int PetId { get; set; }
         public string Name { get; set; }
         public DateTime Date { get; set; }
     }
@@ -46,6 +48,9 @@ public static class CreateTraining
             {
 
             }
+            var pet = await _context.Pets
+            .Include(p => p.Trainings)
+            .FirstOrDefaultAsync(p => p.Id == request.PetId);
 
             var entity = new Training
             {
@@ -53,6 +58,8 @@ public static class CreateTraining
                 Date = request.Date,
                 CreatedDate = DateTime.UtcNow,
             };
+
+            pet.Trainings.Add(entity);
 
             _context.Add(entity);
             await _context.SaveChangesAsync();

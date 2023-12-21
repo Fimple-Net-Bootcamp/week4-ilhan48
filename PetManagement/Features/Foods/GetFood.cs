@@ -30,7 +30,7 @@ public static class GetFood
                 .Select(food => new FoodResponse
                 {
                     Name = food.Name,
-                    
+
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 

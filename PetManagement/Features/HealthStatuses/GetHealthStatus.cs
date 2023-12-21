@@ -10,7 +10,7 @@ public static class GetHealthStatus
 {
     public class Query : IRequest<HealthStatusResponse>
     {
-        public int Id { get; set; }
+        public int PetId { get; set; }
     }
 
     internal sealed class Handler : IRequestHandler<Query, HealthStatusResponse>
@@ -26,7 +26,7 @@ public static class GetHealthStatus
         {
             var healthStatusResponse = await _context
                 .HealthStatuses
-                .Where(hs => hs.Id == request.Id)
+                .Where(hs => hs.PetId == request.PetId)
                 .Select(hs => new HealthStatusResponse
                 {
                     TreatmentInfo = hs.TreatmentInfo,
@@ -34,7 +34,6 @@ public static class GetHealthStatus
                     DiseaseStatus = hs.DiseaseStatus,
                     ExaminationDate = hs.ExaminationDate,
                     Notes = hs.Notes,
-                    PetId = hs.PetId
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -47,9 +46,9 @@ public class GetHealthStatusEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapGet("api/v1/healthStatuses/{id}", async (int id, ISender sender) =>
+        app.MapGet("api/v1/{pet-id}/healthStatuses/", async (int petId, ISender sender) =>
         {
-            var query = new GetHealthStatus.Query { Id = id };
+            var query = new GetHealthStatus.Query { PetId = petId };
 
             var result = await sender.Send(query);
 

@@ -2,6 +2,7 @@
 using FluentValidation;
 using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
@@ -12,6 +13,7 @@ public static class CreateActivity
 {
     public class Command : IRequest<int>
     {
+        public int PetId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string DifficultyLevel { get; set; }
@@ -46,6 +48,9 @@ public static class CreateActivity
             {
 
             }
+            var pet = await _context.Pets
+            .Include(p => p.Activities)
+            .FirstOrDefaultAsync(p => p.Id == request.PetId);
 
             var entity = new Activity
             {
@@ -54,6 +59,8 @@ public static class CreateActivity
                 DifficultyLevel = request.DifficultyLevel,
                 CreatedDate = DateTime.UtcNow,
             };
+
+            pet.Activities.Add(entity);
 
             _context.Add(entity);
             await _context.SaveChangesAsync();

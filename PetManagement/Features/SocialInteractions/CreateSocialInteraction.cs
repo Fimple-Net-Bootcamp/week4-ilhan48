@@ -2,6 +2,7 @@
 using FluentValidation;
 using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
@@ -13,6 +14,7 @@ public static class CreateSocialInteraction
     public class Command : IRequest<int>
     {
         public string Name { get; set; }
+        public int PetId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }
@@ -47,6 +49,9 @@ public static class CreateSocialInteraction
             {
 
             }
+            var pet = await _context.Pets
+            .Include(p => p.SocialInteractions)
+            .FirstOrDefaultAsync(p => p.Id == request.PetId);
 
             var entity = new SocialInteraction
             {
@@ -55,6 +60,8 @@ public static class CreateSocialInteraction
                 EndDate = request.EndDate,
                 CreatedDate = DateTime.UtcNow,
             };
+
+            pet.SocialInteractions.Add(entity);
 
             _context.Add(entity);
             await _context.SaveChangesAsync();

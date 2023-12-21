@@ -7,5 +7,4 @@ public class HealthStatusResponse
     public string DiseaseStatus { get; set; }
     public string TreatmentInfo { get; set; }
     public string Notes { get; set; }
-    public int PetId { get; set; }
 }

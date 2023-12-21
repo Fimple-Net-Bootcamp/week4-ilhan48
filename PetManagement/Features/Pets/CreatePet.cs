@@ -5,7 +5,10 @@ using MediatR;
 using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
+using PetManagement.Features.Activities;
 using PetManagement.Features.Users;
+using System.Diagnostics;
+using Activity = PetManagement.Entities.Activity;
 
 namespace PetManagement.Features.Pets;
 
@@ -19,6 +22,8 @@ public static class CreatePet
         public string Color { get; set; }
         public string Gender { get; set; }
         public Guid? OwnerId { get; set; }
+        //public int[]? ActivityIds { get; set; }
+        //public int[]? FoodIds { get; set; }
     }
     public class CreatePetCommandValidator : AbstractValidator<Command>
     {
@@ -53,17 +58,53 @@ public static class CreatePet
             {
 
             }
-
+            
             var entity = new Pet
             {
+                
                 Name = request.Name,
                 Gender = request.Gender,
                 BirthDate = request.BirthDate,
                 Color = request.Color,
                 Type = request.Type,
                 OwnerId = request.OwnerId,
+                
                 CreatedDate = DateTime.UtcNow
+                
+                
             };
+
+            //var activities = new List<Activity>() { };
+            //foreach (var activityId in request.ActivityIds)
+            //{
+            //    var activity = await _context.Activities.FindAsync(activityId);
+
+            //    if (activity != null)
+            //    {
+            //        if (!entity.Activities.Any(pa => pa.Id == activityId))
+            //        {
+            //            activities.Add(activity);
+            //        }
+            //    }
+            //}
+
+            //entity.Activities = activities;
+
+            //var foods = new List<Food>() { };
+            //foreach (var foodId in request.FoodIds)
+            //{
+            //    var food = await _context.Foods.FindAsync(foodId);
+
+            //    if (food != null)
+            //    {
+            //        if (!entity.Foods.Any(pa => pa.Id == foodId))
+            //        {
+            //            foods.Add(food);
+            //        }
+            //    }
+            //}
+
+            //entity.Foods = foods;
 
             _context.Add(entity);
             await _context.SaveChangesAsync();
