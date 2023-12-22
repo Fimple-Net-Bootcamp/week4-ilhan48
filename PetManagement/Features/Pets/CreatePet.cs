@@ -7,6 +7,7 @@ using PetManagement.Database;
 using PetManagement.Entities;
 using PetManagement.Features.Activities;
 using PetManagement.Features.Users;
+using PetManagement.Shared;
 using System.Diagnostics;
 using Activity = PetManagement.Entities.Activity;
 
@@ -14,7 +15,9 @@ namespace PetManagement.Features.Pets;
 
 public static class CreatePet
 {
-    public class Command : IRequest<int>
+
+
+    public class Command : IRequest<CommandResult<int>>
     {
         public string Name { get; set; }
         public string Type { get; set; }
@@ -22,8 +25,6 @@ public static class CreatePet
         public string Color { get; set; }
         public string Gender { get; set; }
         public Guid? OwnerId { get; set; }
-        //public int[]? ActivityIds { get; set; }
-        //public int[]? FoodIds { get; set; }
     }
     public class CreatePetCommandValidator : AbstractValidator<Command>
     {
@@ -40,7 +41,7 @@ public static class CreatePet
                 .MaximumLength(50).WithMessage("gender is too long!");
         }
     }
-    internal sealed class Handler : IRequestHandler<Command, int>
+    internal sealed class Handler : IRequestHandler<Command, CommandResult<int>>
     {
         private readonly PetManagementDbContext _context;
         private readonly IValidator<Command> _validator;
@@ -51,12 +52,13 @@ public static class CreatePet
             _validator = validator;
         }
 
-        public async Task<int> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<CommandResult<int>> Handle(Command request, CancellationToken cancellationToken)
         {
             var validationResult = _validator.Validate(request);
             if (!validationResult.IsValid)
             {
-
+                var errors = validationResult.Errors.Select(error => error.ErrorMessage).ToList();
+                return new CommandResult<int> { Errors = errors };
             }
             
             var entity = new Pet
@@ -68,47 +70,14 @@ public static class CreatePet
                 Color = request.Color,
                 Type = request.Type,
                 OwnerId = request.OwnerId,
-                
                 CreatedDate = DateTime.UtcNow
                 
                 
             };
 
-            //var activities = new List<Activity>() { };
-            //foreach (var activityId in request.ActivityIds)
-            //{
-            //    var activity = await _context.Activities.FindAsync(activityId);
-
-            //    if (activity != null)
-            //    {
-            //        if (!entity.Activities.Any(pa => pa.Id == activityId))
-            //        {
-            //            activities.Add(activity);
-            //        }
-            //    }
-            //}
-
-            //entity.Activities = activities;
-
-            //var foods = new List<Food>() { };
-            //foreach (var foodId in request.FoodIds)
-            //{
-            //    var food = await _context.Foods.FindAsync(foodId);
-
-            //    if (food != null)
-            //    {
-            //        if (!entity.Foods.Any(pa => pa.Id == foodId))
-            //        {
-            //            foods.Add(food);
-            //        }
-            //    }
-            //}
-
-            //entity.Foods = foods;
-
             _context.Add(entity);
             await _context.SaveChangesAsync();
-            return entity.Id;
+            return new CommandResult<int> { Id = entity.Id };
         }
     }
 }
@@ -119,9 +88,14 @@ public class CreatePetEndpoint : ICarterModule
         app.MapPost("api/v1/pets", async (CreatePetRequest request, ISender sender) =>
         {
             var command = request.Adapt<CreatePet.Command>();
-            var petId = await sender.Send(command);
+            var result = await sender.Send(command);
 
-            return Results.Created($"/pets/{petId}", request);
+            if (result.Errors != null && result.Errors.Any())
+            {
+                return Results.BadRequest(result.Errors);
+            }
+
+            return Results.Created($"/pets/{result.Id}", request);
         });
     }
 }

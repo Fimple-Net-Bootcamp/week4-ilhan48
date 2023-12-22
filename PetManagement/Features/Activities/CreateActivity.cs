@@ -6,12 +6,14 @@ using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
+using PetManagement.Shared;
 
 namespace PetManagement.Features.Activities;
 
 public static class CreateActivity
 {
-    public class Command : IRequest<int>
+
+    public class Command : IRequest<CommandResult<int>>
     {
         public int PetId { get; set; }
         public string Name { get; set; }
@@ -31,7 +33,7 @@ public static class CreateActivity
         }
     }
 
-    internal sealed class Handler : IRequestHandler<Command, int>
+    internal sealed class Handler : IRequestHandler<Command, CommandResult<int>>
     {
         private readonly PetManagementDbContext _context;
         private readonly IValidator<Command> _validator;
@@ -41,12 +43,13 @@ public static class CreateActivity
             _context = context;
             _validator = validator;
         }
-        public async Task<int> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<CommandResult<int>> Handle(Command request, CancellationToken cancellationToken)
         {
             var validationResult = _validator.Validate(request);
             if (!validationResult.IsValid)
             {
-
+                var errors = validationResult.Errors.Select(error => error.ErrorMessage).ToList();
+                return new CommandResult<int> { Errors = errors };
             }
             var pet = await _context.Pets
             .Include(p => p.Activities)
@@ -64,7 +67,7 @@ public static class CreateActivity
 
             _context.Add(entity);
             await _context.SaveChangesAsync();
-            return entity.Id;
+            return new CommandResult<int> { Id = entity.Id };
         }
     }
 }
@@ -75,9 +78,15 @@ public class CreateActivityEndpoint : ICarterModule
         app.MapPost("api/v1/activities", async (CreateActivityRequest request, ISender sender) =>
         {
             var command = request.Adapt<CreateActivity.Command>();
-            var id = await sender.Send(command);
+            var result = await sender.Send(command);
 
-            return Results.Created($"/activities/{id}", request);
+            if (result.Errors != null && result.Errors.Any())
+            {
+                return Results.BadRequest(result.Errors);
+            }
+
+            return Results.Created($"/activities/{result.Id}", request);
+
         });
     }
 }

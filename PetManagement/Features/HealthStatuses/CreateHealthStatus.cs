@@ -5,12 +5,15 @@ using MediatR;
 using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
+using PetManagement.Shared;
 
 namespace PetManagement.Features.HealthStatuses;
 
 public static class CreateHealthStatus
 {
-    public class Command : IRequest<int>
+    
+
+    public class Command : IRequest<CommandResult<int>>
     {
         public DateTime ExaminationDate { get; set; }
         public bool VaccinationStatus { get; set; }
@@ -32,7 +35,7 @@ public static class CreateHealthStatus
         }
     }
 
-    internal sealed class Handler : IRequestHandler<Command, int>
+    internal sealed class Handler : IRequestHandler<Command, CommandResult<int>>
     {
         private readonly PetManagementDbContext _context;
         private readonly IValidator<Command> _validator;
@@ -42,12 +45,13 @@ public static class CreateHealthStatus
             _context = context;
             _validator = validator;
         }
-        public async Task<int> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<CommandResult<int>> Handle(Command request, CancellationToken cancellationToken)
         {
             var validationResult = _validator.Validate(request);
             if (!validationResult.IsValid)
             {
-
+                var errors = validationResult.Errors.Select(error => error.ErrorMessage).ToList();
+                return new CommandResult<int> { Errors = errors };
             }
 
             var entity = new HealthStatus
@@ -63,7 +67,7 @@ public static class CreateHealthStatus
 
             _context.Add(entity);
             await _context.SaveChangesAsync();
-            return entity.Id;
+            return new CommandResult<int> { Id = entity.Id };
         }
     }
 }
@@ -74,9 +78,14 @@ public class CreateHealthStatusEndpoint : ICarterModule
         app.MapPost("api/v1/healthstatuses", async (CreateHealthStatusRequest request, ISender sender) =>
         {
             var command = request.Adapt<CreateHealthStatus.Command>();
-            var id = await sender.Send(command);
+            var result = await sender.Send(command);
 
-            return Results.Created($"/healthstatuses/{id}", request);
+            if (result.Errors != null && result.Errors.Any())
+            {
+                return Results.BadRequest(result.Errors);
+            }
+
+            return Results.Created($"/healthstatuses/{result.Id}", request);
         });
     }
 }

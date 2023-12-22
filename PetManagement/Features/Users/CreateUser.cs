@@ -5,12 +5,14 @@ using MediatR;
 using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
+using PetManagement.Shared;
 
 namespace PetManagement.Features.Users;
 
 public static class CreateUser
 {
-    public class Command : IRequest<Guid>
+    
+    public class Command : IRequest<CommandResult<Guid>>
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -38,7 +40,7 @@ public static class CreateUser
         }
     }
 
-    internal sealed class Handler : IRequestHandler<Command, Guid>
+    internal sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
     {
         private readonly PetManagementDbContext _context;
         private readonly IValidator<Command> _validator;
@@ -49,12 +51,13 @@ public static class CreateUser
             _validator = validator;
         }
 
-        public async Task<Guid> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<CommandResult<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
             var validationResult = _validator.Validate(request);
             if (!validationResult.IsValid)
             {
-                
+                var errors = validationResult.Errors.Select(error => error.ErrorMessage).ToList();
+                return new CommandResult<Guid> { Errors = errors };
             }
 
             var passwordSalt = Guid.NewGuid().ToByteArray();
@@ -70,7 +73,7 @@ public static class CreateUser
 
             _context.Add(entity);
             await _context.SaveChangesAsync();
-            return entity.Id;
+            return new CommandResult<Guid> { Id = entity.Id };
         }
     }
 }
@@ -83,8 +86,14 @@ public class CreateUserEndpoint : ICarterModule
         {
             var command = request.Adapt<CreateUser.Command>();
 
-            var userId = await sender.Send(command);
-            return Results.Created($"/users/{request.Email}", request);
+            var result = await sender.Send(command);
+
+            if (result.Errors != null && result.Errors.Any())
+            {
+                return Results.BadRequest(result.Errors);
+            }
+
+            return Results.Created($"/users/{request.Email}", result.Id);
         });
     }
 }

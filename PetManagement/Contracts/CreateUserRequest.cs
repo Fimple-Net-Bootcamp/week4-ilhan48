@@ -7,3 +7,9 @@ public class CreateUserRequest
     public string Email { get; set; }
     public string UserName { get; set; }
 }
+
+public class CreateUserCommandResponse
+{
+    public bool Succeeded { get; set; }
+    public string Message { get; set; }
+}

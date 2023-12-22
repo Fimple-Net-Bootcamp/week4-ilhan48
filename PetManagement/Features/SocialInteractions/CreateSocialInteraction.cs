@@ -6,12 +6,14 @@ using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
+using PetManagement.Shared;
 
 namespace PetManagement.Features.SocialInteractions;
 
 public static class CreateSocialInteraction
 {
-    public class Command : IRequest<int>
+
+    public class Command : IRequest<CommandResult<int>>
     {
         public string Name { get; set; }
         public int PetId { get; set; }
@@ -31,7 +33,7 @@ public static class CreateSocialInteraction
         }
     }
 
-    internal sealed class Handler : IRequestHandler<Command, int>
+    internal sealed class Handler : IRequestHandler<Command, CommandResult<int>>
     {
         private readonly PetManagementDbContext _context;
         private readonly IValidator<Command> _validator;
@@ -42,12 +44,13 @@ public static class CreateSocialInteraction
             _validator = validator;
         }
 
-        public async Task<int> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<CommandResult<int>> Handle(Command request, CancellationToken cancellationToken)
         {
             var validationResult = _validator.Validate(request);
             if (!validationResult.IsValid)
             {
-
+                var errors = validationResult.Errors.Select(error => error.ErrorMessage).ToList();
+                return new CommandResult<int> { Errors = errors };
             }
             var pet = await _context.Pets
             .Include(p => p.SocialInteractions)
@@ -65,7 +68,7 @@ public static class CreateSocialInteraction
 
             _context.Add(entity);
             await _context.SaveChangesAsync();
-            return entity.Id;
+            return new CommandResult<int> { Id = entity.Id };
         }
     }
 }
@@ -78,8 +81,14 @@ public class CreateSocialInteractionEndpoint : ICarterModule
         {
             var command = request.Adapt<CreateSocialInteraction.Command>();
 
-            var userId = await sender.Send(command);
-            return Results.Created($"/socialinteractions/{request.Name}", request);
+            var result = await sender.Send(command);
+
+            if (result.Errors != null && result.Errors.Any())
+            {
+                return Results.BadRequest(result.Errors);
+            }
+
+            return Results.Created($"/socialinteractions/{result.Id}", request);
         });
     }
 }
