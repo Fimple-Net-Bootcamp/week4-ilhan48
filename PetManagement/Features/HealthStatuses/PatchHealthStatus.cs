@@ -1,5 +1,8 @@
 ﻿using Carter;
 using MediatR;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using PetManagement.Contracts;
 using PetManagement.Database;
 
 namespace PetManagement.Features.HealthStatuses;
@@ -56,17 +59,59 @@ public static class PatchHealthStatus
     }
 }
 
-public class PatchHealthStatusEndpoint : ICarterModule
+[ApiController]
+[Route("api/v1/healthstatuses")]
+public class HealthStatusController : ControllerBase
 {
-    public void AddRoutes(IEndpointRouteBuilder app)
+    private readonly PetManagementDbContext _context;
+
+    public HealthStatusController(PetManagementDbContext context)
     {
-        app.MapPatch("api/v1/healthStatuses/{id}", async (HttpContext context, int id, PatchHealthStatus.PatchHealthStatusCommand request, ISender sender) =>
+        _context = context;
+    }
+
+    [HttpPatch("api/v1/healthstatuses/{id}")]
+    public async Task<IActionResult> PatchHealthStatus(int id, [FromBody] JsonPatchDocument<CreateHealthStatusRequest> patchDocument)
+    {
+        if (patchDocument == null)
         {
-            request.Id = id;
+            return BadRequest();
+        }
 
-            await sender.Send(request);
+        var healthStatus = await _context.HealthStatuses.FindAsync(id);
 
-            return Results.NoContent();
-        });
+        if (healthStatus == null)
+        {
+            return NotFound();
+        }
+
+        var patchDto = new CreateHealthStatusRequest
+        {
+            ExaminationDate = healthStatus.ExaminationDate,
+            VaccinationStatus = healthStatus.VaccinationStatus,
+            DiseaseStatus = healthStatus.DiseaseStatus,
+            TreatmentInfo = healthStatus.TreatmentInfo,
+            Notes = healthStatus.Notes,
+            PetId = healthStatus.PetId
+        };
+
+        patchDocument.ApplyTo(patchDto, ModelState);
+
+        if (!TryValidateModel(patchDto))
+        {
+            return BadRequest(ModelState);
+        }
+
+        healthStatus.ExaminationDate = patchDto.ExaminationDate;
+        healthStatus.VaccinationStatus = patchDto.VaccinationStatus;
+        healthStatus.DiseaseStatus = patchDto.DiseaseStatus;
+        healthStatus.TreatmentInfo = patchDto.TreatmentInfo;
+        healthStatus.Notes = patchDto.Notes;
+        healthStatus.PetId = patchDto.PetId;
+        healthStatus.UpdatedDate = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
     }
 }
