@@ -1,35 +1,45 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/5N8YvsIa)
-Bir önceki hafta sanal evcil hayvan bakımı API'si projesine ekleyeceğiniz ek endpointler 
+# [Evcil Hayvan Yönetimi API]((https://github.com/Fimple-Net-Bootcamp/week4-ilhan48))
 
-### Ek Endpointler
+## Proje Açıklaması
 
-#### Evcil Hayvan İstatistikleri:
-- `GET /evcilHayvanlar/istatistikler/{evcilHayvanId}`: Belirli bir evcil hayvanın aktivite, sağlık ve beslenme istatistiklerini getirir.
+Bu proje, evcil hayvanların etkili bir şekilde yönetilebilmesi için geliştirilmiştir. Vertical Slice Architecture ve CQRS pattern kullanılarak tasarlanan bu API, .NET7, Entity Framework, Mapster, FluentValidation, MediatR gibi güçlü teknolojileri içerir.
 
-#### Kullanıcı İstatistikleri:
-- `GET /kullanicilar/istatistikler/{kullaniciId}`: Belirli bir kullanıcının evcil hayvanları hakkında genel istatistiklerini getirir.
+---
 
-#### Eğitim İşlemleri:
-- `POST /egitimler`: Evcil hayvana yeni bir eğitim ekler.
-- `GET /egitimler/{evcilHayvanId}`: Evcil hayvanın aldığı eğitimleri listeler.
+# Projeyi Kurma ve Çalıştırma Kılavuzu
 
-#### Sosyal Etkileşimler:
-- `POST /sosyalEtkilesimler`: Evcil hayvanlar arası sosyal etkileşim başlatır.
-- `GET /sosyalEtkilesimler/{evcilHayvanId}`: Evcil hayvanın katıldığı sosyal etkileşimleri listeler.
+## Kurulum
 
-### Teknoloji ve Tasarım Önerileri
+Bu bölüm, projeyi yerel geliştirme ortamınızda başarıyla kurmak ve çalıştırmak için gereken adımları detaylandırmaktadır.
 
-#### DTO Kullanımı:
-- Tüm endpointlerde Data Transfer Object (DTO) kullanımı sağlanmalıdır. Bu, verilerin API üzerinden nasıl transfer edileceğini standardize eder ve güvenliği artırır.
+### Adım 1: Repoyu Klonlama
+- Projeyi yerel bilgisayarınıza klonlamak için, terminalinize şu komutu girin:
+  ```
+  git clone https://github.com/Fimple-Net-Bootcamp/week4-ilhan48.git
+  ```
 
-#### AutoMapper Kullanımı:
-- Entity ve DTO arasındaki dönüşümler için AutoMapper kullanılmalıdır. Bu, kodun bakımını ve anlaşılabilirliğini artırır.
+### Adım 2: Geliştirme Ortamını Hazırlama
+- Visual Studio veya tercih ettiğiniz IDE'yi açın.
+- İndirdiğiniz projeyi IDE üzerinden açın.
 
-#### FluentValidation Kullanımı:
-- Tüm input verileri için FluentValidation kullanılarak, gelen verilerin doğruluğu ve uygunluğu kontrol edilmelidir. Bu, hataları erken yakalayarak sistem güvenilirliğini artırır.
+### Adım 3: Bağımlılıkları Yükleme
+- Projede kullanılan kütüphaneler ve bağımlılıklar için, IDE'nizdeki bağımlılık yönetimi aracını kullanarak gerekli paketleri yükleyin. (örneğin Nuget)
 
-#### Ayrı Veri Katmanı ve Dependency Injection:
-- Veri erişim işlemleri için ayrı bir katman (service layer) oluşturulmalı ve bu katman, API controllerlarına Dependency Injection ile enjekte edilmelidir. Bu yaklaşım, kodun modülerliğini ve test edilebilirliğini artırır.
+### Adım 4: Veritabanı Ayarlarını Yapma
+- Projede Entity Framework kullanıyorsanız, veritabanını oluşturmak ve başlangıç verilerini yüklemek için migration komutlarını çalıştırın. Örnek komut:
+  ```
+  dotnet ef database update
+  ```
 
-#### Exception Middleware:
-- Exception (istisna) yönetimi için bir middleware eklenmelidir.
+## Kullanım
+
+### Adım 1: API'yi Başlatma
+- Geliştirme ortamınızda, API servisini başlatmak için gerekli komutları çalıştırın.
+
+### Adım 2: API Dokümantasyonunu İnceleme
+- API endpoint'lerini ve kullanımlarını anlamak için Swagger ya da benzeri bir API belgelendirme aracını kullanın.
+
+### Adım 3: API İle Etkileşime Geçme
+- API'nizle etkileşimde bulunmak için, belirtilen endpoint'lere uygun HTTP istekleri gönderin.
+
+---
