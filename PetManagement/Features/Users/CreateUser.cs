@@ -6,6 +6,7 @@ using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
 using PetManagement.Shared;
+using static PetManagement.Shared.ExceptionMiddleware;
 
 namespace PetManagement.Features.Users;
 
@@ -90,7 +91,7 @@ public class CreateUserEndpoint : ICarterModule
 
             if (result.Errors != null && result.Errors.Any())
             {
-                return Results.BadRequest(result.Errors);
+                throw new ExceptionResponse(result.Errors, StatusCodes.Status400BadRequest);
             }
 
             return Results.Created($"/users/{request.Email}", result.Id);

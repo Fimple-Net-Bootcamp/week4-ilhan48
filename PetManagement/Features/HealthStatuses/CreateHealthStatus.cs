@@ -6,6 +6,7 @@ using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
 using PetManagement.Shared;
+using static PetManagement.Shared.ExceptionMiddleware;
 
 namespace PetManagement.Features.HealthStatuses;
 
@@ -82,7 +83,7 @@ public class CreateHealthStatusEndpoint : ICarterModule
 
             if (result.Errors != null && result.Errors.Any())
             {
-                return Results.BadRequest(result.Errors);
+                throw new ExceptionResponse(result.Errors, StatusCodes.Status400BadRequest);
             }
 
             return Results.Created($"/healthstatuses/{result.Id}", request);

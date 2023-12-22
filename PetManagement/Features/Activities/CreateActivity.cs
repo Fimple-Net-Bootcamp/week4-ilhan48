@@ -7,6 +7,7 @@ using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
 using PetManagement.Shared;
+using static PetManagement.Shared.ExceptionMiddleware;
 
 namespace PetManagement.Features.Activities;
 
@@ -82,7 +83,7 @@ public class CreateActivityEndpoint : ICarterModule
 
             if (result.Errors != null && result.Errors.Any())
             {
-                return Results.BadRequest(result.Errors);
+                throw new ExceptionResponse(result.Errors, StatusCodes.Status400BadRequest);
             }
 
             return Results.Created($"/activities/{result.Id}", request);

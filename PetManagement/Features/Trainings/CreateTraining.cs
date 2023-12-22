@@ -7,6 +7,7 @@ using PetManagement.Contracts;
 using PetManagement.Database;
 using PetManagement.Entities;
 using PetManagement.Shared;
+using static PetManagement.Shared.ExceptionMiddleware;
 
 namespace PetManagement.Features.Trainings;
 
@@ -83,7 +84,7 @@ public class CreateTrainingEndpoint : ICarterModule
 
             if (result.Errors != null && result.Errors.Any())
             {
-                return Results.BadRequest(result.Errors);
+                throw new ExceptionResponse(result.Errors, StatusCodes.Status400BadRequest);
             }
 
             return Results.Created($"/trainings/{result.Id}", request);

@@ -2,6 +2,7 @@ using Carter;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PetManagement.Database;
+using PetManagement.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,5 +41,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseErrorWrappingMiddleware();
 
 app.Run();
