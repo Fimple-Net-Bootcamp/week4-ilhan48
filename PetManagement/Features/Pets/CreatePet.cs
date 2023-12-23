@@ -3,7 +3,8 @@ using FluentValidation;
 using Mapster;
 using MediatR;
 using PetManagement.Contracts;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.PetRepository;
 using PetManagement.Entities;
 using PetManagement.Features.Activities;
 using PetManagement.Features.Users;
@@ -45,11 +46,13 @@ public static class CreatePet
     internal sealed class Handler : IRequestHandler<Command, CommandResult<int>>
     {
         private readonly PetManagementDbContext _context;
+        private readonly IPetRepository _petRepository;
         private readonly IValidator<Command> _validator;
 
-        public Handler(PetManagementDbContext context, IValidator<Command> validator)
+        public Handler(PetManagementDbContext context, IPetRepository petRepository, IValidator<Command> validator)
         {
             _context = context;
+            _petRepository = petRepository;
             _validator = validator;
         }
 
@@ -76,8 +79,7 @@ public static class CreatePet
                 
             };
 
-            _context.Add(entity);
-            await _context.SaveChangesAsync();
+            _petRepository.Add(entity);
             return new CommandResult<int> { Id = entity.Id };
         }
     }

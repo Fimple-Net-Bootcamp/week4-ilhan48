@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PetManagement.Entities;
 
-namespace PetManagement.Database;
+namespace PetManagement.Database.Context;
 
 public class PetManagementDbContext : DbContext
 {
     public PetManagementDbContext(DbContextOptions options) : base(options)
     {
-        
+
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

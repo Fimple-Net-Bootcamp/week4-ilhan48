@@ -1,6 +1,7 @@
 ﻿using Carter;
 using MediatR;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.FoodRepository;
 
 namespace PetManagement.Features.Foods;
 
@@ -13,21 +14,20 @@ public static class DeleteFood
 
     internal sealed class Handler : IRequestHandler<Command, Unit>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly IFoodRepository  _foodRepository;
 
-        public Handler(PetManagementDbContext context)
+        public Handler(IFoodRepository foodRepository)
         {
-            _context = context;
+            _foodRepository = foodRepository;
         }
 
         public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
-            var food = await _context.Foods.FindAsync(request.Id);
+            var food = _foodRepository.Get(f => f.Id == request.Id);
 
             if (food != null)
             {
-                _context.Foods.Remove(food);
-                await _context.SaveChangesAsync(cancellationToken);
+                _foodRepository.Delete(food);
             }
 
             return Unit.Value;

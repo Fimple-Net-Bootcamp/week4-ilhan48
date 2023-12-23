@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using PetManagement.Database.Repositories.Core;
 
 namespace PetManagement.Entities;
 

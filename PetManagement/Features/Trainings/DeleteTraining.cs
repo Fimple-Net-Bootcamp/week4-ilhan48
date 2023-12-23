@@ -1,6 +1,7 @@
 ﻿using Carter;
 using MediatR;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.TrainingRepository;
 
 namespace PetManagement.Features.Trainings;
 
@@ -13,21 +14,20 @@ public static class DeleteTraining
 
     internal sealed class Handler : IRequestHandler<Command, Unit>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly ITrainingRepository _trainingRepository;
 
-        public Handler(PetManagementDbContext context)
+        public Handler(ITrainingRepository trainingRepository)
         {
-            _context = context;
+            _trainingRepository = trainingRepository;
         }
 
         public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
-            var training = await _context.Trainings.FindAsync(request.Id);
+            var training = _trainingRepository.Get(t => t.Id == request.Id);
 
             if (training != null)
             {
-                _context.Trainings.Remove(training);
-                await _context.SaveChangesAsync(cancellationToken);
+                _trainingRepository.Delete(training);
             }
 
             return Unit.Value;

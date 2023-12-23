@@ -4,7 +4,8 @@ using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.FoodRepository;
 using PetManagement.Entities;
 using PetManagement.Shared;
 using static PetManagement.Shared.ExceptionMiddleware;
@@ -36,11 +37,13 @@ public static class CreateFood
     internal sealed class Handler : IRequestHandler<Command, CommandResult<int>>
     {
         private readonly PetManagementDbContext _context;
+        private readonly IFoodRepository _foodRepository;
         private readonly IValidator<Command> _validator;
 
-        public Handler(PetManagementDbContext context, IValidator<Command> validator)
+        public Handler(PetManagementDbContext context, IFoodRepository foodRepository, IValidator<Command> validator)
         {
             _context = context;
+            _foodRepository = foodRepository;
             _validator = validator;
         }
 
@@ -64,10 +67,8 @@ public static class CreateFood
             };
 
             pet.Foods.Add(entity);
-            
 
-            _context.Add(entity);
-            await _context.SaveChangesAsync();
+            _foodRepository.Add(entity);
             return new CommandResult<int> { Id = entity.Id };
         }
     }

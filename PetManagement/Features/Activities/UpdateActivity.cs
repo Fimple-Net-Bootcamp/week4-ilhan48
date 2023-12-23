@@ -1,7 +1,6 @@
 ﻿using Carter;
 using MediatR;
-using PetManagement.Database;
-using PetManagement.Features.HealthStatuses;
+using PetManagement.Database.Repositories.ActivityRepository;
 
 namespace PetManagement.Features.Activities;
 
@@ -17,18 +16,18 @@ public class UpdateActivity
 
     internal sealed class Handler : IRequestHandler<UpdateActivityCommand, Unit>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly IActivityRepository _activityRepository;
 
-        public Handler(PetManagementDbContext context)
+        public Handler(IActivityRepository activityRepository)
         {
-            _context = context;
+            _activityRepository = activityRepository;
         }
 
         public async Task<Unit> Handle(UpdateActivityCommand request, CancellationToken cancellationToken)
         {
             try
             {
-                var activity = await _context.Activities.FindAsync(request.Id);
+                var activity = _activityRepository.Get(a => a.Id == request.Id); 
 
                 if (activity != null)
                 {
@@ -37,7 +36,7 @@ public class UpdateActivity
                     activity.DifficultyLevel = request.DifficultyLevel;
                     activity.UpdatedDate = DateTime.UtcNow;
 
-                    await _context.SaveChangesAsync(cancellationToken);
+                    _activityRepository.Update(activity);
                 }
 
                 return Unit.Value;

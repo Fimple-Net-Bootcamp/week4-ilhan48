@@ -1,6 +1,6 @@
 ﻿using Carter;
 using MediatR;
-using PetManagement.Database;
+using PetManagement.Database.Repositories.ActivityRepository;
 
 namespace PetManagement.Features.Activities;
 
@@ -13,21 +13,21 @@ public static class DeleteActivity
 
     internal sealed class Handler : IRequestHandler<Command, Unit>
     {
-        private readonly PetManagementDbContext _context;
 
-        public Handler(PetManagementDbContext context)
+        private readonly IActivityRepository _activityRepository;
+
+        public Handler(IActivityRepository activityRepository)
         {
-            _context = context;
+            _activityRepository = activityRepository;
         }
 
         public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
-            var activity = await _context.Activities.FindAsync(request.Id);
+            var activity = _activityRepository.Get(a=> a.Id == request.Id);
 
             if (activity != null)
             {
-                _context.Activities.Remove(activity);
-                await _context.SaveChangesAsync(cancellationToken);
+                _activityRepository.Delete(activity);
             }
 
             return Unit.Value;

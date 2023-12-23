@@ -1,8 +1,7 @@
 ﻿using Carter;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
-using PetManagement.Database;
+using PetManagement.Database.Repositories.ActivityRepository;
 
 namespace PetManagement.Features.Activities;
 
@@ -15,25 +14,22 @@ public class GetActivity
 
     internal sealed class Handler : IRequestHandler<Query, ActivityResponse>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly IActivityRepository _activityRepository;
 
-        public Handler(PetManagementDbContext context)
+        public Handler(IActivityRepository activityRepository)
         {
-            _context = context;
+            _activityRepository = activityRepository;
         }
 
         public async Task<ActivityResponse> Handle(Query request, CancellationToken cancellationToken)
         {
-            var activityResponse = await _context
-                .Activities
-                .Where(a => a.Id == request.Id)
-                .Select(a => new ActivityResponse
-                {
-                    Name = a.Name,
-                    DifficultyLevel = a.DifficultyLevel,
-                    Description = a.Description,
-                })
-                .FirstOrDefaultAsync(cancellationToken);
+            var a = _activityRepository.Get(a => a.Id == request.Id);
+            var activityResponse = new ActivityResponse
+            {
+                Name = a.Name,
+                DifficultyLevel = a.DifficultyLevel,
+                Description = a.Description,
+            };
 
             return activityResponse;
         }

@@ -3,7 +3,8 @@ using FluentValidation;
 using Mapster;
 using MediatR;
 using PetManagement.Contracts;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.UserRepository;
 using PetManagement.Entities;
 using PetManagement.Shared;
 using static PetManagement.Shared.ExceptionMiddleware;
@@ -44,12 +45,14 @@ public static class CreateUser
     internal sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
     {
         private readonly PetManagementDbContext _context;
+        private readonly IUserRepository _userRepository;
         private readonly IValidator<Command> _validator;
 
-        public Handler(PetManagementDbContext context, IValidator<Command> validator)
+        public Handler(PetManagementDbContext context, IValidator<Command> validator, IUserRepository userRepository)
         {
             _context = context;
             _validator = validator;
+            _userRepository = userRepository;
         }
 
         public async Task<CommandResult<Guid>> Handle(Command request, CancellationToken cancellationToken)
@@ -72,8 +75,7 @@ public static class CreateUser
                 CreatedDate = DateTime.UtcNow,
             };
 
-            _context.Add(entity);
-            await _context.SaveChangesAsync();
+            _userRepository.Add(entity);
             return new CommandResult<Guid> { Id = entity.Id };
         }
     }

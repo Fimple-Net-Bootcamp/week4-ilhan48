@@ -1,7 +1,8 @@
 ﻿using Carter;
 using Mapster;
 using MediatR;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.UserRepository;
 
 namespace PetManagement.Features.Users;
 
@@ -18,22 +19,22 @@ public static class UpdateUser
 
     internal sealed class Handler : IRequestHandler<Command, Unit>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly IUserRepository _userRepository;
 
-        public Handler(PetManagementDbContext context)
+        public Handler (IUserRepository userRepository)
         {
-            _context = context;
+            _userRepository = userRepository;
         }
 
         public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
-            var user = await _context.Users.FindAsync(request.Id);
+            var user = _userRepository.Get(u => u.Id == request.Id);
 
             if (user != null)
             {
                 user = request.Adapt(user);
 
-                await _context.SaveChangesAsync(cancellationToken);
+                _userRepository.Update(user);
             }
 
             return Unit.Value;

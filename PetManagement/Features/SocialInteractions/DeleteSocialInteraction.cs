@@ -1,7 +1,6 @@
 ﻿using Carter;
 using MediatR;
-using PetManagement.Database;
-using PetManagement.Entities;
+using PetManagement.Database.Context;
 
 namespace PetManagement.Features.SocialInteractions;
 

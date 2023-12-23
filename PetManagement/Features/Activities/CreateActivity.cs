@@ -4,7 +4,8 @@ using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.ActivityRepository;
 using PetManagement.Entities;
 using PetManagement.Shared;
 using static PetManagement.Shared.ExceptionMiddleware;
@@ -37,11 +38,13 @@ public static class CreateActivity
     internal sealed class Handler : IRequestHandler<Command, CommandResult<int>>
     {
         private readonly PetManagementDbContext _context;
+        private readonly IActivityRepository _activityRepository;
         private readonly IValidator<Command> _validator;
 
-        public Handler(PetManagementDbContext context, IValidator<Command> validator)
+        public Handler(PetManagementDbContext context, IActivityRepository activityRepository, IValidator<Command> validator)
         {
             _context = context;
+            _activityRepository = activityRepository;
             _validator = validator;
         }
         public async Task<CommandResult<int>> Handle(Command request, CancellationToken cancellationToken)
@@ -66,8 +69,7 @@ public static class CreateActivity
 
             pet.Activities.Add(entity);
 
-            _context.Add(entity);
-            await _context.SaveChangesAsync();
+            _activityRepository.Add(entity);
             return new CommandResult<int> { Id = entity.Id };
         }
     }

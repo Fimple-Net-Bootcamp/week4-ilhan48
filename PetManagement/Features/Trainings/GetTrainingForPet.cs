@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
-using PetManagement.Database;
+using PetManagement.Database.Context;
 using PetManagement.Entities;
 
 namespace PetManagement.Features.Trainings;

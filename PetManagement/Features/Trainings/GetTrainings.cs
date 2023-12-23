@@ -2,7 +2,9 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.TrainingRepository;
+using PetManagement.Entities;
 
 namespace PetManagement.Features.Trainings;
 
@@ -15,25 +17,34 @@ public class GetTrainings
 
     internal sealed class Handler : IRequestHandler<Query, List<TrainingResponse>>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly ITrainingRepository _trainingRepository;
 
-        public Handler(PetManagementDbContext context)
+        public Handler(ITrainingRepository trainingRepository)
         {
-            _context = context;
+            _trainingRepository = trainingRepository;
         }
 
         public async Task<List<TrainingResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var trainingResponse = await _context
-                .Trainings
-                .Select(training => new TrainingResponse
+            List<Training> trainings = new List<Training>();
+
+            foreach (var training in _trainingRepository.GetAll())
+            {
+                trainings.Add(training);
+            }
+
+            List<TrainingResponse> responses = new List<TrainingResponse>();
+            for (int i = 0; i < trainings.Count; i++)
+            {
+                var foodResponse = new TrainingResponse
                 {
-                    Name = training.Name,
+                    Name = trainings[i].Name,
 
-                })
-                .ToListAsync(cancellationToken);
+                };
+                responses.Add(foodResponse);
+            }
 
-            return trainingResponse;
+            return responses;
 
         }
     }

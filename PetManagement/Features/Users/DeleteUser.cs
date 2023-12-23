@@ -1,6 +1,7 @@
 ﻿using Carter;
 using MediatR;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.UserRepository;
 
 namespace PetManagement.Features.Users;
 
@@ -13,21 +14,20 @@ public static class DeleteUser
 
     internal sealed class Handle : IRequestHandler<Command, Unit>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly IUserRepository _userRepository;
 
-        public Handle(PetManagementDbContext context)
+        public Handle(IUserRepository userRepository)
         {
-            _context = context;
+            _userRepository = userRepository;
         }
 
         async Task<Unit> IRequestHandler<Command, Unit>.Handle(Command request, CancellationToken cancellationToken)
         {
-            var user = await _context.Users.FindAsync(request.Id);
+            var user = _userRepository.Get(u => u.Id == request.Id);
 
             if (user != null)
             {
-                _context.Users.Remove(user);
-                await _context.SaveChangesAsync(cancellationToken);
+                _userRepository.Delete(user);
             }
 
             return Unit.Value;

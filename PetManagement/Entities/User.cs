@@ -1,4 +1,6 @@
-﻿namespace PetManagement.Entities;
+﻿using PetManagement.Database.Repositories.Core;
+
+namespace PetManagement.Entities;
 
 public class User : BaseEntity<Guid>
 {

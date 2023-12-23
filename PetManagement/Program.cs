@@ -2,6 +2,7 @@ using Carter;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PetManagement.Database;
+using PetManagement.Database.Context;
 using PetManagement.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,10 +14,9 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var assembly = typeof(Program).Assembly;
+builder.Services.AddDatabaseServices(builder.Configuration);
 
-builder.Services.AddDbContext<PetManagementDbContext>(option =>
-    option.UseNpgsql(builder.Configuration.GetConnectionString("PetManagement")));
+var assembly = typeof(Program).Assembly;
 
 builder.Services.AddMediatR(config =>
     config.RegisterServicesFromAssembly(assembly));

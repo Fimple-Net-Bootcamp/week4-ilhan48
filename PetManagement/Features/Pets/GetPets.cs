@@ -2,7 +2,9 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.PetRepository;
+using PetManagement.Entities;
 
 namespace PetManagement.Features.Pets;
 
@@ -15,30 +17,41 @@ public static class GetPets
 
     internal sealed class Handler : IRequestHandler<Query, List<PetResponse>>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly IPetRepository _petRepository;
 
-        public Handler(PetManagementDbContext context)
+        public Handler(IPetRepository petRepository)
         {
-            _context = context;
+            _petRepository = petRepository;
         }
 
         public async Task<List<PetResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var petResponse = await _context
-                .Pets
-                .Select(pet => new PetResponse
-                {
-                    Name = pet.Name,
-                    Gender = pet.Gender,
-                    Color = pet.Color,
-                    Type = pet.Type,
-                    BirthDate = pet.BirthDate,
-                    OwnerId = pet.OwnerId,
-                })
-                .ToListAsync(cancellationToken);
+            List<Pet> pets = new List<Pet>();
 
-            return petResponse;
-            
+            foreach (var pet in _petRepository.GetAll())
+            {
+                pets.Add(pet);
+            }
+
+            List<PetResponse> responses = new List<PetResponse>();
+            for (int i = 0; i < pets.Count; i++)
+            {
+                var petResponse = new PetResponse
+                {
+                    Name = pets[i].Name,
+                    Color = pets[i].Color,
+                    BirthDate = pets[i].BirthDate,
+                    Gender = pets[i].Gender,
+                    OwnerId = pets[i].OwnerId,
+                    Type = pets[i].Type,
+
+                };
+                responses.Add(petResponse);
+            }
+
+            return responses;
+
+
         }
     }
 }

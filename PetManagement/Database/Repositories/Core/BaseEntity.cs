@@ -1,4 +1,4 @@
-﻿namespace PetManagement.Entities;
+﻿namespace PetManagement.Database.Repositories.Core;
 
 public abstract class BaseEntity<TId>
 {

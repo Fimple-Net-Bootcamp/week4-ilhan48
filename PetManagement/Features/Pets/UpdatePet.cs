@@ -1,6 +1,7 @@
 ﻿using Carter;
 using MediatR;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.PetRepository;
 
 namespace PetManagement.Features.Pets;
 
@@ -19,18 +20,18 @@ public static class UpdatePet
 
     internal sealed class Handler : IRequestHandler<UpdatePetCommand, Unit>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly IPetRepository _petRepository;
 
-        public Handler(PetManagementDbContext context)
+        public Handler(IPetRepository petRepository)
         {
-            _context = context;
+            _petRepository = petRepository;
         }
 
         public async Task<Unit> Handle(UpdatePetCommand request, CancellationToken cancellationToken)
         {
             try
             {
-                var pet = await _context.Pets.FindAsync(request.PetId);
+                var pet = _petRepository.Get(p => p.Id == request.PetId);
 
                 if (pet != null)
                 {
@@ -42,7 +43,7 @@ public static class UpdatePet
                     pet.OwnerId = request.OwnerId;
                     pet.UpdatedDate = DateTime.UtcNow;
 
-                    await _context.SaveChangesAsync(cancellationToken);
+                    _petRepository.Update(pet);
                 }
 
                 return Unit.Value;

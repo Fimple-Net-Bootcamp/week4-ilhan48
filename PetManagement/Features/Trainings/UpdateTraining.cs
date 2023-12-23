@@ -1,6 +1,7 @@
 ﻿using Carter;
 using MediatR;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.TrainingRepository;
 using PetManagement.Features.Foods;
 
 namespace PetManagement.Features.Trainings;
@@ -15,25 +16,25 @@ public class UpdateTraining
 
     internal sealed class Handler : IRequestHandler<UpdateTrainingCommand, Unit>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly ITrainingRepository _trainingRepository;
 
-        public Handler(PetManagementDbContext context)
+        public Handler(ITrainingRepository trainingRepository)
         {
-            _context = context;
+            _trainingRepository = trainingRepository;
         }
 
         public async Task<Unit> Handle(UpdateTrainingCommand request, CancellationToken cancellationToken)
         {
             try
             {
-                var training = await _context.Trainings.FindAsync(request.Id);
+                var training = _trainingRepository.Get(t => t.Id == request.Id);
 
                 if (training != null)
                 {
                     training.Name = request.Name;
                     training.UpdatedDate = DateTime.UtcNow;
 
-                    await _context.SaveChangesAsync(cancellationToken);
+                    _trainingRepository.Update(training);
                 }
 
                 return Unit.Value;

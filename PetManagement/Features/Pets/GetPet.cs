@@ -2,7 +2,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.PetRepository;
 using PetManagement.Features.Users;
 
 namespace PetManagement.Features.Pets;
@@ -16,28 +17,25 @@ public static class GetPet
 
     internal sealed class Handler : IRequestHandler<Query, PetResponse>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly IPetRepository _petRepository;
 
-        public Handler(PetManagementDbContext context)
+        public Handler(IPetRepository petRepository)
         {
-            _context = context;
+            _petRepository = petRepository;
         }
 
         public async Task<PetResponse> Handle(Query request, CancellationToken cancellationToken)
         {
-            var petResponse = await _context
-                .Pets
-                .Where(pet => pet.Id == request.Id)
-                .Select(pet => new PetResponse
-                {
-                    Name = pet.Name,
-                    Gender = pet.Gender,
-                    Type = pet.Type,
-                    Color = pet.Color,
-                    BirthDate = pet.BirthDate,
-                    OwnerId = pet.OwnerId,
-                })
-                .FirstOrDefaultAsync(cancellationToken);
+            var pet = _petRepository.Get(p => p.Id == request.Id);
+            var petResponse = new PetResponse
+            {
+                Name = pet.Name,
+                Gender = pet.Gender,
+                Type = pet.Type,
+                Color = pet.Color,
+                BirthDate = pet.BirthDate,
+                OwnerId = pet.OwnerId,
+            };
 
             return petResponse;
         }

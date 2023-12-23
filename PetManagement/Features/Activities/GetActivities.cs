@@ -1,8 +1,8 @@
 ﻿using Carter;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
-using PetManagement.Database;
+using PetManagement.Database.Repositories.ActivityRepository;
+using PetManagement.Entities;
 
 namespace PetManagement.Features.Activities;
 
@@ -15,27 +15,36 @@ public class GetActivities
 
     internal sealed class Handler : IRequestHandler<Query, List<ActivityResponse>>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly IActivityRepository _activityRepository;
 
-        public Handler(PetManagementDbContext context)
+        public Handler(IActivityRepository activityRepository)
         {
-            _context = context;
+            _activityRepository = activityRepository;
         }
 
         public async Task<List<ActivityResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var activityResponse = await _context
-                .Activities
-                .Select(a => new ActivityResponse
+            List<Activity> activities = new List<Activity>();
+
+            foreach (var activity in _activityRepository.GetAll())
+            {
+                activities.Add(activity);
+            }
+
+            List<ActivityResponse> responses = new List<ActivityResponse>();
+            for (int i = 0; i < activities.Count; i++)
+            {
+                var activityResponse = new ActivityResponse
                 {
-                    Name = a.Name,
-                    Description = a.Description,
-                    DifficultyLevel = a.DifficultyLevel,
-                })
-                .ToListAsync(cancellationToken);
+                    Name = activities[i].Name,
+                    Description = activities[i].Description,
+                    DifficultyLevel = activities[i].DifficultyLevel,
 
-            return activityResponse;
+                };
+                responses.Add(activityResponse);
+            }
 
+            return responses;
         }
     }
 }

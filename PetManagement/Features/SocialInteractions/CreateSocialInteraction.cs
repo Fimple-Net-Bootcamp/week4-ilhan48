@@ -4,7 +4,7 @@ using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
-using PetManagement.Database;
+using PetManagement.Database.Context;
 using PetManagement.Entities;
 using PetManagement.Shared;
 using static PetManagement.Shared.ExceptionMiddleware;

@@ -2,7 +2,9 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PetManagement.Contracts;
-using PetManagement.Database;
+using PetManagement.Database.Context;
+using PetManagement.Database.Repositories.FoodRepository;
+using PetManagement.Entities;
 
 namespace PetManagement.Features.Foods;
 
@@ -15,25 +17,35 @@ public static class GetFoods
 
     internal sealed class Handler : IRequestHandler<Query, List<FoodResponse>>
     {
-        private readonly PetManagementDbContext _context;
+        private readonly IFoodRepository _foodRepository;
 
-        public Handler(PetManagementDbContext context)
+        public Handler(IFoodRepository foodRepository)
         {
-            _context = context;
+            _foodRepository = foodRepository;
         }
+
 
         public async Task<List<FoodResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var foodResponse = await _context
-                .Foods
-                .Select(food => new FoodResponse
-                {
-                    Name = food.Name,
-                    
-                })
-                .ToListAsync(cancellationToken);
+            List<Food> foods = new List<Food>();
 
-            return foodResponse;
+            foreach (var food in _foodRepository.GetAll())
+            {
+                foods.Add(food);
+            }
+
+            List<FoodResponse> responses = new List<FoodResponse>();
+            for (int i = 0; i < foods.Count; i++)
+            {
+                var foodResponse = new FoodResponse
+                {
+                    Name = foods[i].Name,
+
+                };
+                responses.Add(foodResponse);
+            }
+
+            return responses;
 
         }
     }
